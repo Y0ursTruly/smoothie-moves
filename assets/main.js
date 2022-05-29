@@ -206,19 +206,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addScoreToLocalStorage(lastScore){
         // Convert to JSON string each key is a score and value is stringified score object
-        localStorage[finalScore]=JSON.stringify(lastScore);
+        localStorage[lastScore.date]=JSON.stringify(lastScore);
     }
 
     function getHighScore(){
-        //'scores' sorted by key and map of score results
+        //'scores' sorted by name and map of score results
         let highScore = 0;
-        let scores=Object.keys(localStorage).sort((a,b)=>parseInt(b)-parseInt(a))
-        .map((key,index)=>{
-            let score=JSON.parse(localStorage[key]);
+        let scores=Object.keys(localStorage);
+	.map(key=>{
+	    let score=JSON.parse(localStorage[key]);
+	    if(Number(key)!=score.date){
+		//before, the keys were the scores which isn't that unique, so they're changed to the dates
+	        delete localStorage[key];
+		localStorage[score.date]=score;
+	    }
+            return score;
+	})
+	.sort((a,b)=>parseInt(b.score)-parseInt(a.score))
+        .map((score)=>{
             if (key > highScore) {
                 highScore = key;
             }
-            return `(${index+1})\nScore: ${key}\nDate Achieved: ${score.date}\nSeconds taken: ${score.seconds}\nRank: ${score.rank}\nMoves made: ${score.turns}`;
+            return `(${index+1})\nScore: ${key}\nDate Achieved: ${score.date}\nSeconds taken: ${new Date(score.seconds)}\nRank: ${score.rank}\nMoves made: ${score.turns}`;
         }).join('\n\n');
         console.log("Top scores\n"+scores); //example show of scores
         return highScore;
